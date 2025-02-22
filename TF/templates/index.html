@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TuneFuse</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Starfield Background -->
+    <div id="starfield" class="starfield"></div>
+
+    <!-- Logo -->
+    <a href="/" class="logo-container">
+        <img src="/images/tunefuse-logo.png" alt="TuneFuse" class="logo">
+    </a>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Auth Buttons -->
+        <div id="auth-buttons" class="auth-buttons">
+            <button onclick="toggleModal('loginModal')" class="btn">Login</button>
+            <button onclick="toggleModal('registerModal')" class="btn">Register</button>
+        </div>
+
+        <!-- Header -->
+        <div class="header-container">
+            <h1 class="app-title">TUNEFUSE</h1>
+            <p class="subtitle">DISCOVER YOUR NEXT FAVORITE SONG</p>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search for a song...">
+                <div id="suggestions" class="suggestions"></div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results" class="results-container"></div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <button type="button" class="close-btn" onclick="toggleModal('loginModal')">&times;</button>
+            <h2>Login</h2>
+            <form id="loginForm">
+                <input type="text" id="loginUsername" placeholder="Username or Email" required>
+                <input type="password" id="loginPassword" placeholder="Password" required>
+                <button type="submit" class="btn">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <button type="button" class="close-btn" onclick="toggleModal('registerModal')">&times;</button>
+            <h2>Create Account</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <input type="text" id="regFirstName" placeholder="First Name" required>
+                    <input type="text" id="regLastName" placeholder="Last Name" required>
+                </div>
+                <div class="form-group">
+                    <input type="date" id="regDob" required>
+                    <select id="regSex" required>
+                        <option value="">Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <select id="regCountry" required>
+                    <option value="">Select Country</option>
+                </select>
+                <input type="email" id="regEmail" placeholder="Email" required>
+                <input type="text" id="regUsername" placeholder="Username" required>
+                <input type="password" id="regPassword" placeholder="Password" required>
+                <div class="password-strength">
+                    <div class="strength-bar"></div>
+                    <p class="strength-text"></p>
+                </div>
+                <input type="password" id="regPasswordConfirm" placeholder="Confirm Password" required>
+                <p class="password-hint">Password must have at least 8 characters, including uppercase, lowercase, numbers, and special characters</p>
+                <button type="submit" class="btn" disabled>Register</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div id="nav-buttons" class="nav-buttons hidden">
+        <button type="button" class="btn" data-modal="mySongsModal">My Songs</button>
+        <button type="button" class="btn" data-modal="hiddenSongsModal">Hidden Songs</button>
+        <button type="button" class="btn" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Finding similar songs...</p>
+        </div>
+    </div>
+
+    <!-- My Songs Modal -->
+    <div id="mySongsModal" class="modal" role="dialog">
+        <div class="modal-content">
+            <button type="button" class="close-btn" onclick="toggleModal('mySongsModal')">&times;</button>
+            <h2>My Liked Songs</h2>
+            <div id="likedSongsList" class="songs-list">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Songs Modal -->
+    <div id="hiddenSongsModal" class="modal" role="dialog">
+        <div class="modal-content">
+            <button type="button" class="close-btn" onclick="toggleModal('hiddenSongsModal')">&times;</button>
+            <h2>Hidden Songs</h2>
+            <div id="hiddenSongsList" class="songs-list">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="connect-info">
+                <a href="https://open.spotify.com" target="_blank" class="connect-item">
+                    <img src="/images/spotify_logo_white.png" alt="Spotify">
+                    <span>Powered by Spotify</span>
+                </a>
+                <a href="https://www.last.fm" target="_blank" class="connect-item">
+                    <img src="/images/lastfm-icon.png" alt="Last.fm">
+                    <span>Recommendations by Last.fm</span>
+                </a>
+                <a href="https://www.deezer.com" target="_blank" class="connect-item">
+                    <img src="/images/deezer-icon.png" alt="Deezer">
+                    <span>Previews by Deezer</span>
+                </a>
+            </div>
+            <div class="copyright">
+                © 2024 TuneFuse. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Update recommendation template -->
+    <script id="recommendation-template" type="text/template">
+        <div class="recommendation-item" data-song-id="${rec.id}">
+            <img src="${rec.image || '/images/default-album.png'}" alt="${rec.title}" onerror="this.src='/images/default-album.png'">
+            <div class="song-info">
+                <div class="song-text">
+                    <h3>${rec.title}</h3>
+                    <p>${rec.artist}</p>
+                </div>
+                ${rec.preview_url ? `
+                    <audio controls class="preview-player">
+                        <source src="${rec.preview_url}" type="audio/mp3">
+                    </audio>
+                ` : '<p class="no-preview">No preview available</p>'}
+            </div>
+            <div class="song-controls">
+                <button 
+                    type="button" 
+                    class="icon-button"
+                    onclick="likeSong('${rec.id}', '${rec.title}', '${rec.artist}', '${rec.image}', this)"
+                    title="${rec.isLiked ? 'Unlike' : 'Like'} this song">
+                    <img 
+                        src="/images/${rec.isLiked ? 'like-icon-liked.png' : 'like-icon.png'}" 
+                        alt="${rec.isLiked ? 'Unlike' : 'Like'}" 
+                        data-liked="${rec.isLiked}"
+                    >
+                </button>
+                <button 
+                    type="button" 
+                    class="icon-button"
+                    onclick="hideSong('${rec.id}', '${rec.title}', '${rec.artist}')"
+                    title="Hide this song">
+                    <img src="/images/hide-icon.png" alt="Hide">
+                </button>
+                <a href="https://open.spotify.com/track/${rec.id}" 
+                   target="_blank" 
+                   class="spotify-button">
+                    <img src="/images/spotify-icon.png" alt="Spotify">
+                    Play on Spotify
+                </a>
+            </div>
+        </div>
+    </script>
+
+    <!-- Scripts -->
+    <script src="/js/starfield.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>
