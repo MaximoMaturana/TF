@@ -1,0 +1,990 @@
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    color: white;
+    background: black;
+    min-height: 110vh; /* Slightly taller than viewport */
+    overflow-x: hidden; /* Prevent horizontal scroll */
+    overflow-y: auto;
+    padding-bottom: 120px; /* Add padding at the bottom */
+    width: 100%;
+    position: relative;
+}
+
+/* Starfield effect */
+.starfield {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    opacity: 0;
+    animation: twinkle linear infinite;
+    box-shadow: 0 0 3px rgba(255, 255, 255, 0.3);
+}
+
+@keyframes twinkle {
+    0% { opacity: 0; }
+    25% { opacity: 0.3; }
+    50% { opacity: 1; }
+    75% { opacity: 0.3; }
+    100% { opacity: 0; }
+}
+
+/* Main container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    text-align: center;
+    position: relative; /* Change from fixed to relative */
+    z-index: 1;
+    min-height: calc(100vh + 100px); /* Make container slightly taller */
+}
+
+/* Search and Results */
+.search-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    position: relative;
+}
+
+#searchInput {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.95);
+    border-radius: 0 0 10px 10px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+}
+
+h1 {
+    font-size: 2.5rem;
+    color: #fff;
+}
+
+.search-section {
+    margin: 40px 0;
+}
+
+#searchInput:focus {
+    outline: none;
+    border-color: #1DB954;
+}
+
+.suggestion-item {
+    padding: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.suggestion-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.suggestion-item img {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+.suggestion-text {
+    flex: 1;
+    text-align: left;
+}
+
+.results-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(1200px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+    width: 100%;
+    max-width: 100%;  /* Allow container to be full width */
+    margin: 0 auto;
+    padding: 0;  /* Remove padding to allow full width */
+    min-height: 200px;
+}
+
+.song-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: left;
+    min-width: 200px; /* Fixed width for cards */
+    flex-shrink: 0; /* Prevent cards from shrinking */
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    background: #1DB954;
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+    margin: 0 5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn:hover {
+    background: #1ed760;
+}
+
+.btn img {
+    width: 20px;
+    height: 20px;
+    filter: brightness(0) invert(1);
+}
+
+.auth-buttons {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 1001;
+}
+
+.auth-buttons .btn {
+    background: rgba(29, 185, 84, 0.8);
+    transition: background-color 0.2s;
+}
+
+.auth-buttons .btn:hover {
+    background: rgba(29, 185, 84, 1);
+}
+
+/* Add Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 2000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal.show {
+    display: flex !important;
+    opacity: 1;
+    visibility: visible;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: rgba(30, 30, 30, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow-y: auto;
+    color: white;
+    position: relative;
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+}
+
+.modal.show .modal-content {
+    transform: scale(1);
+}
+
+.modal-content input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.modal-content select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+}
+
+.modal-content select option {
+    background: #222;
+    color: white;
+}
+
+.password-hint {
+    font-size: 0.8rem;
+    color: #ccc;
+    margin: 5px 0;
+}
+
+.songs-list {
+    max-height: 400px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.song-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.song-item img {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+    border-radius: 5px;
+}
+
+.nav-buttons {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 1001;
+}
+
+.nav-buttons .btn {
+    min-width: 120px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: #1DB954;
+    border: none;
+    border-radius: 20px;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    pointer-events: all;
+}
+
+.nav-buttons .btn:hover {
+    transform: scale(1.05);
+    background: #1ed760;
+}
+
+.nav-buttons .btn:active {
+    transform: scale(0.95);
+}
+
+.hidden {
+    display: none;
+}
+
+.recommendations-section {
+    width: 100%;
+    margin: 30px 0;
+    padding: 0;  /* Remove padding */
+    background: rgba(0, 0, 0, 0.5);
+    position: relative;
+    backdrop-filter: blur(10px);
+    max-height: 85vh;  /* Increased from 70vh */
+    display: flex;
+    flex-direction: column;  /* Stack title and list vertically */
+    align-items: flex-start;  /* Align to the left */
+    padding-left: 1%;  /* Reduced from 3% */
+}
+
+.recommendations-section h2 {
+    position: sticky;  /* Make title sticky */
+    top: 0;
+    background: rgba(0, 0, 0, 0.8);
+    width: 90%;  /* Match list width */
+    padding: 20px 0;
+    margin: 0;
+    backdrop-filter: blur(5px);
+    z-index: 1;
+    font-size: 1.5rem;  /* Added to ensure text fits */
+    white-space: nowrap;  /* Added to prevent wrapping */
+    overflow: hidden;    /* Added to prevent overflow */
+    text-overflow: ellipsis;  /* Added to show ... when text is too long */
+}
+
+.recommendations-list {
+    width: 95%;  /* Increased from 90% */
+    max-width: 1400px;  /* Increased from 1200px */
+    margin: 0;  /* Remove auto margin */
+    display: flex;
+    flex-direction: column;
+    gap: 12px;  /* Reduced gap between items */
+    padding: 15px 0;  /* Reduced padding */
+    overflow-y: auto;  /* Make only the list scrollable */
+}
+
+/* Add custom scrollbar for recommendations section */
+.recommendations-section::-webkit-scrollbar {
+    width: 8px;
+}
+
+.recommendations-section::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.recommendations-section::-webkit-scrollbar-thumb {
+    background: rgba(29, 185, 84, 0.5);
+    border-radius: 4px;
+}
+
+.recommendations-section::-webkit-scrollbar-thumb:hover {
+    background: rgba(29, 185, 84, 0.7);
+}
+
+/* Custom scrollbar for the entire page */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(29, 185, 84, 0.5);
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(29, 185, 84, 0.7);
+}
+
+/* Recommendation Items */
+.recommendation-item {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    padding: 15px 20px;  /* Slightly reduced vertical padding */
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    gap: 20px;
+}
+
+.recommendation-item img {
+    width: 80px;  /* Increased from 60px */
+    height: 80px;  /* Increased from 60px */
+    border-radius: 5px;
+    object-fit: cover;
+    flex-shrink: 0;  /* Prevent image from shrinking */
+}
+
+.song-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 15px;
+    margin-left: -10px;  /* Move text closer to image */
+}
+
+.song-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;  /* Reduced gap between title and artist */
+    margin-bottom: 4px;  /* Add space between text and preview */
+    margin-left: 0;  /* Reset any inherited margins */
+    text-align: left;  /* Ensure text is left-aligned */
+}
+
+.song-text h3 {
+    margin: 0;
+    font-size: 1.2rem;  /* Slightly larger */
+    color: white;
+    line-height: 1.2;  /* Improved line height */
+}
+
+.song-text p {
+    margin: 0;
+    color: #ccc;
+    font-size: 0.95rem;  /* Slightly smaller */
+    line-height: 1.2;  /* Improved line height */
+}
+
+.song-info h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.song-info p {
+    margin: 0;
+    color: #ccc;
+}
+
+.song-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-left: auto;
+    flex-shrink: 0;
+    position: relative; /* Added */
+}
+
+.preview-player {
+    width: 180px;  /* Increased from 150px */
+    height: 24px;
+    margin: 0;  /* Remove all margins */
+    filter: invert(1) brightness(0.7);  /* Made darker */
+    opacity: 0.6;  /* More subtle appearance */
+    transition: opacity 0.2s;
+    align-self: flex-start;  /* Align to the left */
+}
+
+.preview-player:hover {
+    opacity: 0.8;  /* Still subtle when hovering */
+}
+
+.no-preview {
+    font-size: 0.8rem;  /* Smaller text */
+    color: #666;
+    margin-top: 8px;
+}
+
+.recommendations-container {
+    display: flex;
+    gap: 20px;
+    padding-bottom: 20px;
+    min-width: min-content;
+}
+
+.header-container {
+    text-align: center;
+    margin: 40px auto 60px; /* Increase margin to create more space */
+    padding-top: 40px; /* Add some top padding */
+}
+
+h1.app-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 4rem;
+    margin-bottom: 15px;
+    color: white;
+    font-weight: 800;
+    letter-spacing: 4px;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.subtitle {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.3rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 40px;
+    letter-spacing: 1px;
+}
+
+.spotify-home {
+    position: fixed;
+    top: -70px;
+    left: 20px; /* Changed from right to left */
+    width: 250px;  /* Increased from 30px */
+    height: 250px; /* Increased from 30px */
+    transition: transform 0.2s;
+    z-index: 1001; /* Ensure it's above other elements */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.spotify-home img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Remove selected-song related styles as we won't need them anymore */
+
+.icon-button {
+    position: relative; /* Added */
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0; /* Reset padding */
+    margin: 0; /* Reset margin */
+    z-index: 1; /* Ensure button is clickable */
+}
+
+.icon-button::before { /* Added hover effect area */
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+    border-radius: 50%;
+    background: transparent;
+    transition: background-color 0.2s;
+}
+
+.icon-button:hover::before {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.icon-button img {
+    width: 32px;
+    height: 32px;
+    pointer-events: none;
+    position: relative;
+    z-index: 2;
+}
+
+.songs-list .recommendation-item {
+    margin-bottom: 15px;
+}
+
+.songs-list .song-cover {
+    width: 60px;
+    height: 60px;
+    border-radius: 5px;
+    object-fit: cover;
+}
+
+.no-songs {
+    text-align: center;
+    color: #ccc;
+    padding: 20px;
+}
+
+.unhide-button {
+    background: #ff4444;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+    min-width: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.unhide-button:hover {
+    background: #ff6666;
+    transform: scale(1.05);
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;  /* Hidden by default */
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    backdrop-filter: blur(5px);
+    pointer-events: all;  /* Block all interactions */
+}
+
+.loading-overlay.active {
+    display: flex;
+}
+
+.loading-container {
+    text-align: center;
+    padding: 40px;
+    border-radius: 10px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(255,255,255,.2);
+    border-radius: 50%;
+    border-top-color: #1DB954;
+    animation: spin 1s ease-in-out infinite;
+}
+
+.loading-text {
+    color: white;
+    margin-top: 20px;
+    font-size: 1.2rem;
+    font-family: 'Montserrat', sans-serif;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.form-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.form-group input,
+.form-group select {
+    flex: 1;
+}
+
+.password-strength {
+    margin: 5px 0;
+    padding: 5px;
+}
+
+.strength-bar {
+    height: 4px;
+    border-radius: 2px;
+    margin-bottom: 5px;
+    background: #333;
+    transition: all 0.3s;
+}
+
+.strength-bar.weak { background: #ff4444; width: 33%; }
+.strength-bar.medium { background: #ffbb33; width: 66%; }
+.strength-bar.strong { background: #1DB954; width: 100%; }
+
+.strength-text {
+    font-size: 0.8rem;
+    color: #ccc;
+}
+
+.btn:disabled {
+    background: #666;
+    cursor: not-allowed;
+}
+
+/* Footer */
+.site-footer {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    padding: 30px 0;
+    width: 100%;
+    position: relative;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    margin-top: 60px;
+    box-sizing: border-box; /* Ensure padding is included in width */
+}
+
+.footer-content {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.footer-section {
+    color: white;
+}
+
+.footer-section h3 {
+    color: #1DB954;
+    font-family: 'Montserrat', sans-serif;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+}
+
+.footer-section p {
+    color: #ccc;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-section ul li {
+    color: #ccc;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.footer-section ul li:before {
+    content: "•";
+    color: #1DB954;
+}
+
+.footer-section.centered {
+    text-align: center;
+}
+
+.api-logos {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.api-logos img {
+    height: 30px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.api-logos img:hover {
+    opacity: 1;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 20px;
+    margin-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-bottom p {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.connect-info {
+    display: flex;
+    justify-content: center;
+    gap: 100px;  /* Increased gap between items */
+    margin-bottom: 30px;
+    align-items: center;
+    padding: 20px 0;  /* Added padding */
+}
+
+.connect-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;  /* Increased gap between image and text */
+    text-decoration: none;
+}
+
+.connect-item img {
+    width: 80px;  /* Increased from 60px */
+    height: 80px;  /* Increased from 60px */
+    opacity: 0.9;
+    object-fit: contain;
+    filter: brightness(1.3);
+    transition: all 0.3s ease;
+}
+
+.connect-item:hover img {
+    transform: scale(1.12);  /* Slightly reduced scale on hover */
+    opacity: 1;
+}
+
+.connect-item span {
+    color: white !important;  /* Force white color */
+    font-size: 1rem;
+    pointer-events: none;  /* Make text non-interactive */
+}
+
+.spotify-button {
+    background: #1DB954;
+    color: white;
+    text-decoration: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.spotify-button:hover {
+    background: #1ed760;
+    transform: scale(1.02);
+}
+
+.spotify-button img {
+    width: 18px;  /* Smaller Spotify icon */
+    height: 18px;
+    filter: brightness(0) invert(1);  /* Make icon white */
+}
+
+.copyright {
+    color: #666;
+    font-size: 0.8rem;
+    margin-top: 20px;
+}
+
+.logo-container {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    transition: transform 0.2s ease;
+}
+
+.logo {
+    width: 150px;  /* Adjust size as needed */
+    height: auto;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+}
+
+.logo-container:hover {
+    transform: scale(1.05);
+}
+
+.icon-button, .unhide-button {
+    all: unset; /* Reset all styles */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px; /* Minimum touch target size */
+    min-height: 44px; /* Minimum touch target size */
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    background: transparent;
+    position: relative;
+    z-index: 2;
+}
+
+.icon-button:hover, .icon-button:focus {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.1);
+}
+
+.icon-button:active {
+    transform: scale(0.95);
+}
+
+.icon-button img {
+    width: 32px;
+    height: 32px;
+}
+
+.unhide-button {
+    background: #ff4444;
+    color: white;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    min-width: 100px;
+}
+
+.unhide-button:hover {
+    background: #ff6666;
+    transform: scale(1.05);
+}
+
+.unhide-button:active {
+    transform: scale(0.98);
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.song-date {
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 4px;
+}
+
+/* Updated Search Suggestions Styling */
+.suggestions-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0 0 10px 10px;
+    margin-top: 5px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+}
+
+.recommendation-source {
+    font-size: 0.9rem;
+    color: #888;
+    margin: 5px 0 15px 0;
+    font-style: italic;
+}
