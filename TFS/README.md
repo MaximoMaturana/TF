@@ -1,8 +1,8 @@
-# TuneFuse 🎵
+# TuneFuse 
 
 A modern music recommendation platform combining Spotify, Last.fm, and Deezer APIs to help you discover your next favorite song!
 
-## 🚀 Quick Start Guide
+##  Quick Start Guide
 
 ### Prerequisites
 
@@ -61,18 +61,18 @@ A modern music recommendation platform combining Spotify, Last.fm, and Deezer AP
    - Go to: `http://localhost:5000`
    - Start discovering music! 🎉
 
-## 🎯 Features
+##  Features
 
-- 🔍 Smart song search with autocomplete
-- 🎵 Personalized music recommendations
-- 🎧 Song preview playback
-- 💫 Animated starfield background
-- 👤 User account system
-- ❤️ Like/save favorite songs
-- 🚫 Hide unwanted recommendations
-- 🔄 Integration with Spotify, Last.fm, and Deezer
+-  Smart song search with autocomplete
+-  Personalized music recommendations
+-  Song preview playback
+-  Animated starfield background
+-  User account system
+-  Like/save favorite songs
+-  Hide unwanted recommendations
+-  Integration with Spotify, Last.fm, and Deezer
 
-## 🛠️ Troubleshooting
+## Troubleshooting
 
 ### Common Issues & Solutions
 
@@ -100,7 +100,7 @@ A modern music recommendation platform combining Spotify, Last.fm, and Deezer AP
    python server.py
    ```
 
-## 📝 API Key Setup Guide
+## API Key Setup Guide
 
 ### Getting Spotify API Keys
 1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/)
@@ -114,14 +114,7 @@ A modern music recommendation platform combining Spotify, Last.fm, and Deezer AP
 2. Fill in the application details
 3. Save your API key
 
-## 💡 Pro Tips
-
-- Use the starfield background for better ambiance
-- Try searching for different genres to get diverse recommendations
-- Use the preview feature to quickly sample songs
-- Check "My Songs" regularly to rediscover saved music
-
-## 🤝 Need Help?
+## Need Help?
 
 If you encounter any issues:
 1. Check the troubleshooting section above
@@ -132,10 +125,3 @@ If you encounter any issues:
    - Python version (`python --version`)
    - Full error message
    - Steps to reproduce the issue
-
-## 🛡️ License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-Happy Music Discovery! 🎵✨
