@@ -57,62 +57,85 @@ class Database:
         self.conn.commit()
 
     ### ✅ USER AUTHENTICATION ###
+    def check_existing_user(self, username, email):
+        """Check if username or email already exists."""
+        try:
+            self.cursor.execute('SELECT id FROM users WHERE username = ? OR email = ?', 
+                              (username, email))
+            return self.cursor.fetchone() is not None
+        except Exception as e:
+            print(f"Error checking existing user: {e}")
+            return False
+
     def create_user(self, username, password, firstname, lastname, email, age=None, sex=None, country=None):
         """Create a new user with the given details."""
         try:
-            # Add debug prints
-            print(f"Creating user with data:")
-            print(f"Username: {username}")
-            print(f"First name: {firstname}")
-            print(f"Last name: {lastname}")
-            print(f"Email: {email}")
-            print(f"DOB: {age}")  # age parameter is actually DOB
-            
-            hashed_password = generate_password_hash(password)
-            
-            # Check if username or email already exists
-            self.cursor.execute('SELECT id FROM users WHERE username = ? OR email = ?', 
-                              (username, email))
-            if self.cursor.fetchone():
-                print("Username or email already exists")
+            # Check if user exists first
+            if self.check_existing_user(username, email):
+                print("User already exists")
                 return None
 
-            self.cursor.execute('''
+            # Hash password
+            hashed_password = generate_password_hash(password)
+            
+            # Insert new user
+            query = '''
                 INSERT INTO users 
                 (username, password, firstname, lastname, email, dob, sex, country)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (username, hashed_password, firstname, lastname, email, age, sex, country))
+            '''
+            self.cursor.execute(query, (
+                username, 
+                hashed_password, 
+                firstname, 
+                lastname, 
+                email, 
+                age, 
+                sex, 
+                country
+            ))
             
             self.conn.commit()
-            user_id = self.cursor.lastrowid
-            print(f"User created successfully with ID: {user_id}")
-            return user_id
+            new_user_id = self.cursor.lastrowid
+            print(f"Successfully created user with ID: {new_user_id}")
+            return new_user_id
+
         except sqlite3.IntegrityError as e:
-            print(f"Database integrity error: {e}")
+            print(f"IntegrityError in create_user: {e}")
+            self.conn.rollback()
             return None
         except Exception as e:
-            print(f"Database error in create_user: {e}")
-            print(f"Full error details: {str(e)}")
+            print(f"Unexpected error in create_user: {e}")
+            self.conn.rollback()
             return None
 
     def verify_user(self, username, password):
         """Verify user credentials and return user data if valid."""
         try:
-            self.cursor.execute('''
-                SELECT id, username, password 
+            query = '''
+                SELECT id, username, password, email 
                 FROM users 
                 WHERE username = ? OR email = ?
-            ''', (username, username))
+            '''
+            self.cursor.execute(query, (username, username))
             
             user = self.cursor.fetchone()
-            if user and check_password_hash(user[2], password):
+            if not user:
+                print("User not found")
+                return None
+
+            if check_password_hash(user[2], password):
                 return {
                     "id": user[0],
-                    "username": user[1]
+                    "username": user[1],
+                    "email": user[3]
                 }
+                
+            print("Invalid password")
             return None
+
         except Exception as e:
-            print(f"Database error in verify_user: {e}")
+            print(f"Error in verify_user: {e}")
             return None
 
     def save_song(self, user_id, song_data):
