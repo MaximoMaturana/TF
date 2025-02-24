@@ -44,6 +44,9 @@ function setupEventListeners() {
     
     // Modal handlers
     setupModalHandlers();
+
+    // Load countries for registration form
+    loadCountries();
 }
 
 // API interaction functions
@@ -505,7 +508,6 @@ async function handleLogin(e) {
 async function handleRegister(e) {
     e.preventDefault();
     
-    // Get all required form values
     const formData = {
         username: document.getElementById('regUsername').value.trim(),
         email: document.getElementById('regEmail').value.trim(),
@@ -517,7 +519,6 @@ async function handleRegister(e) {
         country: document.getElementById('regCountry').value
     };
 
-    // Validate required fields
     const required = ['username', 'email', 'password', 'firstname', 'lastname'];
     const missing = required.filter(field => !formData[field]);
     
@@ -536,12 +537,19 @@ async function handleRegister(e) {
         const data = await response.json();
 
         if (response.ok) {
-            alert('Registration successful! Please login.');
+            const confirmed = confirm('Registration successful! Would you like to login now?');
             toggleModal('registerModal');
-            toggleModal('loginModal');
-        } else {
-            alert(data.error || 'Registration failed. Please try again.');
+            if (confirmed) {
+                toggleModal('loginModal');
+                // Pre-fill the login username
+                document.getElementById('loginUsername').value = formData.username;
+            }
+            return; // Add return here to prevent further execution
         }
+        
+        // Only show error if response was not OK
+        alert(data.error || 'Registration failed. Please try again.');
+        
     } catch (error) {
         console.error('Registration error:', error);
         alert('Registration failed. Please try again.');
@@ -700,3 +708,23 @@ document.addEventListener('click', (e) => {
         suggestionsDiv.style.display = 'none';
     }
 });
+
+async function loadCountries() {
+    const countrySelect = document.getElementById('regCountry');
+    if (!countrySelect) return;
+
+    try {
+        const response = await fetch('/api/countries');
+        const countries = await response.json();
+        
+        countries.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country.code;
+            option.textContent = country.name;
+            countrySelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error loading countries:', error);
+        countrySelect.innerHTML = '<option value="">Error loading countries</option>';
+    }
+}
