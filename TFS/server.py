@@ -1,3 +1,15 @@
+"""
+TuneFuse - Your Personal Music Discovery App
+
+This is the main server file that handles:
+1. User authentication (login/register)
+2. Music search and recommendations
+3. Managing liked/hidden songs
+4. Integration with Spotify, Last.fm, and Deezer
+
+Made with using Flask
+"""
+
 import base64
 import os
 import requests
@@ -12,7 +24,7 @@ import asyncio
 from functools import wraps
 from datetime import timedelta
 
-# Load environment variables
+# Load our secret keys from .env file (keeps them safe!)
 load_dotenv()
 SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
@@ -20,20 +32,20 @@ SPOTIFY_REDIRECT_URI = os.getenv("SPOTIFY_REDIRECT_URI")
 LASTFM_API_KEY = os.getenv("LASTFM_API_KEY")
 DEEZER_API_URL = "https://api.deezer.com/search"
 
-# Initialize Flask app
+# Create our Flask app with some basic settings
 app = Flask(__name__, 
     static_folder='assets',
     static_url_path=''
 )
-app.secret_key = os.urandom(24)
-app.config['SESSION_COOKIE_SECURE'] = False  # For development
+app.secret_key = os.urandom(24)  # Random key for extra security
+app.config['SESSION_COOKIE_SECURE'] = False  # For local development
 app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)  # Stay logged in for a week
 
-# Initialize database
+# Set up our database connection
 db = Database()
 
-# Configure logging
+# Set up logging so we can track any problems
 logging.basicConfig(level=logging.DEBUG)
 
 def get_spotify_token():
@@ -117,15 +129,21 @@ def check_login():
 def register():
     """Handle user registration"""
     try:
-        data = request.json
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+
         required_fields = ['username', 'password', 'email', 'firstname', 'lastname']
-        if not all(data.get(field) for field in required_fields):
-            missing = [field for field in required_fields if not data.get(field)]
+        
+        # Check required fields
+        if not all(field in data and data[field] for field in required_fields):
+            missing = [field for field in required_fields if not field in data or not data[field]]
             return jsonify({
                 "error": f"Missing required fields: {', '.join(missing)}"
             }), 400
 
-        user_id = db.create_user(
+        # Try to create user
+        result = db.create_user(
             username=data['username'],
             password=data['password'],
             firstname=data['firstname'],
@@ -136,40 +154,80 @@ def register():
             country=data.get('country')
         )
 
-        if user_id:
+        if result.get("success"):
             return jsonify({
-                "success": True, 
+                "success": True,
                 "message": "Registration successful",
-                "user_id": user_id
+                "user_id": result["user_id"]
             }), 200
         else:
+            # Return the specific error message
             return jsonify({
-                "error": "Failed to create user. Username or email might already exist."
+                "success": False,
+                "error": result.get("error", "Registration failed")
             }), 409
 
     except Exception as e:
-        logging.error(f"Registration error: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        app.logger.error(f"Registration error: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": "An unexpected error occurred"
+        }), 500
 
 @app.route('/api/login', methods=['POST'])
 def login():
     """Handle user login"""
     try:
-        data = request.json
-        if not data or 'username' not in data or 'password' not in data:
-            return jsonify({"error": "Missing credentials"}), 400
+        data = request.get_json()
+        if not data:
+            return jsonify({"success": False, "error": "No data provided"}), 400
 
-        user = db.verify_user(data['username'], data['password'])
+        username = data.get('username', '').strip()
+        password = data.get('password', '')
+
+        if not username or not password:
+            return jsonify({
+                "success": False,
+                "error": "Username and password are required"
+            }), 400
+
+        result = db.verify_user(username, password)
         
-        if user:
-            session['user_id'] = user['id']
-            return jsonify({"success": True, "message": "Login successful"}), 200
-        else:
-            return jsonify({"error": "Invalid credentials"}), 401
+        if result and "id" in result:
+            session.clear()
+            session['user_id'] = result['id']
+            session.permanent = True
+            
+            return jsonify({
+                "success": True,
+                "message": "Login successful",
+                "user": {
+                    "id": result['id'],
+                    "username": result['username']
+                }
+            }), 200
+        
+        # Handle specific error cases
+        error_msg = "Invalid username or password"
+        if result and "error" in result:
+            if result["error"] == "user_not_found":
+                error_msg = "User not found"
+            elif result["error"] == "invalid_password":
+                error_msg = "Invalid password"
+            elif result["error"] == "database_error":
+                error_msg = "Database error occurred"
+
+        return jsonify({
+            "success": False,
+            "error": error_msg
+        }), 401
 
     except Exception as e:
-        logging.error(f"Login error: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        app.logger.error(f"Login error: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": "An error occurred during login"
+        }), 500
 
 @app.route('/api/logout', methods=['POST'])
 def logout():
