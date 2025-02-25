@@ -1,6 +1,5 @@
 /*
-TuneFuse Frontend Magic! ✨
-
+TuneFuse Frontend 
 This is where all the interactive stuff happens:
 - Making the stars twinkle in the background
 - Searching for songs
@@ -8,8 +7,6 @@ This is where all the interactive stuff happens:
 - Handling likes and hides
 - Making the modals pop up and disappear
 - Keeping track of who's logged in
-
-It's like the conductor of our music orchestra! 🎵
 */
 
 document.addEventListener('DOMContentLoaded', function() {
