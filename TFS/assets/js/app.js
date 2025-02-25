@@ -1,16 +1,30 @@
+/*
+TuneFuse Frontend Magic! ✨
+
+This is where all the interactive stuff happens:
+- Making the stars twinkle in the background
+- Searching for songs
+- Showing recommendations
+- Handling likes and hides
+- Making the modals pop up and disappear
+- Keeping track of who's logged in
+
+It's like the conductor of our music orchestra! 🎵
+*/
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize UI elements
+    // Let's get this party started! 🎉
     const searchInput = document.getElementById('searchInput');
     const suggestionsDiv = document.getElementById('suggestions');
     const resultsDiv = document.getElementById('results');
     
-    // Create starfield effect
+    // Make our background all sparkly ✨
     initializeStarfield();
     
-    // Setup event listeners
+    // Set up all our buttons and forms
     setupEventListeners();
     
-    // Check login status on load
+    // Check if someone's already logged in
     checkLoginStatus();
 });
 
@@ -44,9 +58,9 @@ function setupEventListeners() {
     
     // Modal handlers
     setupModalHandlers();
-
-    // Load countries for registration form
-    loadCountries();
+    
+    // Add country selector initialization
+    initializeCountrySelector();
 }
 
 // API interaction functions
@@ -479,25 +493,44 @@ window.toggleModal = function(modalId) {
 // Auth functions
 async function handleLogin(e) {
     e.preventDefault();
-    const username = document.getElementById('loginUsername').value;
-    const password = document.getElementById('loginPassword').value;
-
+    
     try {
+        const username = document.getElementById('loginUsername').value.trim();
+        const password = document.getElementById('loginPassword').value;
+
+        if (!username || !password) {
+            alert('Please enter both username and password');
+            return;
+        }
+
         const response = await fetch('/api/login', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include', // Add this line
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            credentials: 'include',
             body: JSON.stringify({ username, password })
         });
 
         const data = await response.json();
 
-        if (response.ok) {
-            await checkLoginStatus(); // Check status after successful login
+        if (data.success) {
+            // Clear login form
+            document.getElementById('loginForm').reset();
+            
+            // Close login modal
             toggleModal('loginModal');
-            window.location.reload(); // Force page reload
+            
+            // Wait for modal to close
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            // Update UI and reload
+            await checkLoginStatus();
+            window.location.reload();
         } else {
-            alert(data.error || 'Invalid credentials');
+            // Show specific error message
+            alert(data.error || 'Login failed. Please try again.');
         }
     } catch (error) {
         console.error('Login error:', error);
@@ -508,51 +541,68 @@ async function handleLogin(e) {
 async function handleRegister(e) {
     e.preventDefault();
     
-    const formData = {
-        username: document.getElementById('regUsername').value.trim(),
-        email: document.getElementById('regEmail').value.trim(),
-        password: document.getElementById('regPassword').value,
-        firstname: document.getElementById('regFirstName').value.trim(),
-        lastname: document.getElementById('regLastName').value.trim(),
-        dob: document.getElementById('regDob').value,
-        sex: document.getElementById('regSex').value,
-        country: document.getElementById('regCountry').value
-    };
-
-    const required = ['username', 'email', 'password', 'firstname', 'lastname'];
-    const missing = required.filter(field => !formData[field]);
-    
-    if (missing.length > 0) {
-        alert(`Please fill in all required fields: ${missing.join(', ')}`);
-        return;
-    }
-
     try {
+        const form = document.getElementById('registerForm');
+        const formData = {
+            username: form.querySelector('#regUsername').value.trim(),
+            email: form.querySelector('#regEmail').value.trim(),
+            password: form.querySelector('#regPassword').value,
+            firstname: form.querySelector('#regFirstName').value.trim(),
+            lastname: form.querySelector('#regLastName').value.trim(),
+            dob: form.querySelector('#regDob').value,
+            sex: form.querySelector('#regSex').value,
+            country: form.querySelector('#regCountry').value
+        };
+
+        // Validate required fields
+        const required = ['username', 'email', 'password', 'firstname', 'lastname'];
+        if (required.some(field => !formData[field])) {
+            alert('Please fill in all required fields');
+            return;
+        }
+
         const response = await fetch('/api/register', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
             body: JSON.stringify(formData)
         });
 
         const data = await response.json();
 
-        if (response.ok) {
-            const confirmed = confirm('Registration successful! Would you like to login now?');
-            toggleModal('registerModal');
-            if (confirmed) {
-                toggleModal('loginModal');
-                // Pre-fill the login username
-                document.getElementById('loginUsername').value = formData.username;
-            }
-            return; // Add return here to prevent further execution
+        if (data.success) {
+            // Clear the form first
+            form.reset();
+            
+            // Close registration modal
+            const regModal = document.getElementById('registerModal');
+            regModal.classList.remove('show');
+            regModal.style.display = 'none';
+            
+            // Wait for modal to close
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            // Show success message
+            alert('Registration successful! Please login.');
+            
+            // Open login modal
+            toggleModal('loginModal');
+        } else {
+            // Handle specific error cases
+            const errorMessages = {
+                'username_taken': 'This username is already taken',
+                'email_taken': 'This email is already registered',
+                'database_error': 'An error occurred. Please try again',
+                'unexpected_error': 'An unexpected error occurred'
+            };
+            
+            alert(errorMessages[data.error] || data.error || 'Registration failed');
         }
-        
-        // Only show error if response was not OK
-        alert(data.error || 'Registration failed. Please try again.');
-        
     } catch (error) {
         console.error('Registration error:', error);
-        alert('Registration failed. Please try again.');
+        alert('Registration failed. Please try again later.');
     }
 }
 
@@ -699,6 +749,29 @@ function setupModalHandlers() {
     }
 }
 
+// Add this new function for country selection
+async function initializeCountrySelector() {
+    const countrySelect = document.getElementById('regCountry');
+    try {
+        const response = await fetch('https://restcountries.com/v3.1/all');
+        const countries = await response.json();
+        
+        // Sort countries by name
+        countries.sort((a, b) => a.name.common.localeCompare(b.name.common));
+        
+        // Add countries to select element
+        countries.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country.name.common;
+            option.textContent = country.name.common;
+            countrySelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error loading countries:', error);
+        countrySelect.innerHTML = '<option value="">Error loading countries</option>';
+    }
+}
+
 // Click outside search to close suggestions
 document.addEventListener('click', (e) => {
     const suggestionsDiv = document.getElementById('suggestions');
@@ -708,23 +781,3 @@ document.addEventListener('click', (e) => {
         suggestionsDiv.style.display = 'none';
     }
 });
-
-async function loadCountries() {
-    const countrySelect = document.getElementById('regCountry');
-    if (!countrySelect) return;
-
-    try {
-        const response = await fetch('/api/countries');
-        const countries = await response.json();
-        
-        countries.forEach(country => {
-            const option = document.createElement('option');
-            option.value = country.code;
-            option.textContent = country.name;
-            countrySelect.appendChild(option);
-        });
-    } catch (error) {
-        console.error('Error loading countries:', error);
-        countrySelect.innerHTML = '<option value="">Error loading countries</option>';
-    }
-}
